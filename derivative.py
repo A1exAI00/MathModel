@@ -4,6 +4,8 @@
 Пока что не знаю, что их вызывает
 Буду пока использовать Метод конечных разностей : https://en.wikipedia.org/wiki/Finite_difference_method
 Коэффициенты формул численного дифференцирования : https://en.wikipedia.org/wiki/Finite_difference_coefficient
+
+Код для fourier_derivative_2nd взят с https://krischer.github.io/seismo_live_build/html/Computational%20Seismology/The%20Pseudospectral%20Method/ps_fourier_acoustic_1d.html
 '''
 
 import numpy as np
