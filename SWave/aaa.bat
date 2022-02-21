@@ -1,0 +1,1 @@
+ffmpeg -y -r 60 -i "frames/png_%%05d.png" -filter_complex "scale=w=500:-1:flags=lanczos,fps=30, split=2[a][b];[a]palettegen[c];[b][c]paletteuse" "hello_480.gif"
