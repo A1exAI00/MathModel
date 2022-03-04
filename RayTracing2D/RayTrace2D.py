@@ -9,7 +9,7 @@ DONE: учесть что надо учитывать только одно на
 DONE: ввести возможность ручного выбора положения окр через circle_map
 TODO: ввести возможность ручного выбора положения многоугольников через polygon_map
 TODO: ускорить функцию draw_circle
-TODO: Окружить поле квадратом с вектором нормали (0,0) и ловить пересечение с таким вектором - отрисовать луч, идущий за край картинки и break
+DONE: Окружить поле квадратом с вектором нормали (0,0) и ловить пересечение с таким вектором - отрисовать луч, идущий за край картинки и break
 DONE: написать "документацию"
 
 Возможные тудушки-улучшения:
@@ -33,7 +33,7 @@ import copy
 
 
 class Circle():
-    def __init__(self, pos, R) -> None:
+    def __init__(self, pos, R, special=False) -> None:
         '''
         Parameters
         ----------
@@ -45,6 +45,7 @@ class Circle():
         self.x, self.y = pos
         self.pos = pos
         self.R = R
+        self.special = special
     
     def get_pos(self):
         ''' Getter для координат центра окружности (x_c, y_c) '''
@@ -90,12 +91,16 @@ class Circle():
     
     def calc_normal_vect(self, point):
         ''' Рассчёт вектора нормали в точке point '''
+        if self.special:
+            return (0,0)
         x, y = point
         x_c, y_c = self.pos
         return ((x-x_c)/self.R, (y-y_c)/self.R)
 
     def calc_tangent_vect(self, point):
         ''' Рассчёт вектора касательной в точке point '''
+        if self.special:
+            return (0,0)
         x, y = point
         x_c, y_c = self.pos
         return ((y-y_c)/self.R, -(x-x_c)/self.R)
@@ -106,11 +111,13 @@ class Circle():
 
 
 class Regular_polygon():
-    def __init__(self, pos, R, N_sides, angle_shift_rad=0) -> None:
+    def __init__(self, pos, R, N_sides, angle_shift_rad=0, special=False) -> None:
         self.pos = pos
         self.R, self.N_sides = R, N_sides
         self.angle_shift_rad = angle_shift_rad
         self.internal_angle = 2*np.pi/N_sides
+        self.special = special
+
         self.side_len = self.R * 2 * np.sin(np.pi/N_sides)
 
         self.vertices_points = self.calc_polygon_vertices()
@@ -137,7 +144,10 @@ class Regular_polygon():
             tmp_first_point, tmp_second_point = self.vertices_points[i], self.vertices_points[i+1]
             x_1, y_1 = tmp_first_point
             x_2, y_2 = tmp_second_point
-            tangent_vect = ((x_2-x_1)/self.side_len, (y_2-y_1)/self.side_len)
+            if self.special:
+                tangent_vect = (0,0)
+            else:
+                tangent_vect = ((x_2-x_1)/self.side_len, (y_2-y_1)/self.side_len)
             normal_vect = (-tangent_vect[1], tangent_vect[0])
             sides_info.append((tmp_first_point, tmp_second_point, normal_vect))
         return sides_info
@@ -301,7 +311,7 @@ def save_picture(matrix, index=0, time_name=True):
 # ----------------------------------------------------------------------
 
 
-def main(random=False, just_save_objects=False):
+def main(random=False, just_save_objects=False, border=True):
     # Выбор режима работы
     # Либо расположить объекты рандомно, либо в соответствии с circle_map и polygon_map
     if random:
@@ -311,6 +321,9 @@ def main(random=False, just_save_objects=False):
     else:
         circle_objects = [Circle(CIRCLE_MAP[i], CIRCLE_R) for i in range(len(CIRCLE_MAP))]
         reg_polygon_objects = []
+    
+    if border:
+        circle_objects.append(Circle((WIDTH/2, HEIGHT/2), WIDTH+HEIGHT, special=True))
 
     # Создание матрицы размера WIDTH х HEIGHT 
     image_matrix = [['white' for j in range(HEIGHT)] for i in range(WIDTH)]
